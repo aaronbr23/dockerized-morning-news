@@ -2,7 +2,8 @@ import os
 import asyncio
 from datetime import date
 import yaml
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from telegram import Bot
 
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
@@ -22,14 +23,16 @@ def build_prompt(assets):
     return f"""
 Du bist ein präziser Finanzanalyst. Heute ist der {date.today().strftime('%d.%m.%Y')}.
 
-Schreibe einen kurzen Morgenbericht (~150 Wörter) auf Deutsch mit Bullet Points über diese Finanzprodukte:
+Suche nach aktuellen Nachrichten der letzten 24 Stunden, die Auswirkungen auf folgende Assets haben könnten:
 {asset_list}
-Für jedes Produkt:
-- Aktueller Kurs und Veränderung zum Vortag (in % und absolut)
-- 2-3 relevante Nachrichten oder Ereignisse der letzten 24h die den Kurs beeinflusst haben
+Für jede relevante Nachricht:
+- Beschreibe kurz die Nachricht
+- Erkläre welche Assets davon betroffen sind
+- Bewerte die Auswirkung: 📈 positiv, 📉 negativ oder ⚠️ unklar
 
-Nutze aktuelle Daten aus dem Internet.
-Format: Kurze Überschrift pro Produkt, darunter Bullet Points.
+Fokus auf: Makroökonomie, Zinsentscheide, Geopolitik, Unternehmensnews (besonders SAP), Technologiesektor.
+Ignoriere unwichtige oder nicht relevante Nachrichten.
+Format: Pro Nachricht ein Block mit Bullet Points. Maximal 5 Nachrichten.
 Schreibe NUR den Bericht, keine Einleitung oder Abschluss.
 """
 
@@ -38,13 +41,15 @@ async def main():
     assets = config["assets"]
     prompt = build_prompt(assets)
 
-    # Gemini aufrufen
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        tools="google_search"  # Grounding mit Google Search für aktuelle Daten
+    # Gemini aufrufen mit Google Search Grounding
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            tools=[types.Tool(google_search=types.GoogleSearch())]
+        )
     )
-    response = model.generate_content(prompt)
     report = response.text
 
     # Telegram senden
