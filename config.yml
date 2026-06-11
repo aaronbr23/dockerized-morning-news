@@ -1,0 +1,12 @@
+assets:
+  - isin: IE00B4L5Y983
+    name: MSCI World (iShares Core)
+    type: etf
+
+  - isin: IE00B4K48X80
+    name: MSCI Europe (iShares Core)
+    type: etf
+
+  - isin: DE0007164600
+    name: SAP
+    type: stock
