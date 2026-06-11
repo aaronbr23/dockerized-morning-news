@@ -1,3 +1,5 @@
+language: de # de or en
+
 assets:
   - isin: IE00B4L5Y983
     name: MSCI World (iShares Core)

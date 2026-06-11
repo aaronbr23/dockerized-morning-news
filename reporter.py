@@ -14,13 +14,35 @@ def load_config():
     with open("config.yml", "r") as f:
         return yaml.safe_load(f)
 
-def build_prompt(assets):
-    asset_list = ""
-    for asset in assets:
-        type_label = "ETF" if asset["type"] == "etf" else "Aktie"
-        asset_list += f"- {asset['name']} ({type_label}, ISIN: {asset['isin']})\n"
+def build_prompt(assets, language):
+    if language == "en":
+        asset_list = ""
+        for asset in assets:
+            type_label = "ETF" if asset["type"] == "etf" else "Stock"
+            asset_list += f"- {asset['name']} ({type_label}, ISIN: {asset['isin']})\n"
 
-    return f"""
+        return f"""
+You are a precise financial analyst. Today is {date.today().strftime('%B %d, %Y')}.
+
+Search for recent news from the last 24 hours that could impact the following assets:
+{asset_list}
+For each relevant news item:
+- Briefly describe the news
+- Explain which assets are affected
+- Assess the impact: positive, negative, or unclear
+
+Focus on: macroeconomics, interest rate decisions, geopolitics, company news, technology sector.
+Ignore unimportant or irrelevant news.
+Format: One block per news item with bullet points. Maximum 5 news items.
+Write ONLY the report, no introduction or closing remarks. Do not use emojis.
+"""
+    else:
+        asset_list = ""
+        for asset in assets:
+            type_label = "ETF" if asset["type"] == "etf" else "Aktie"
+            asset_list += f"- {asset['name']} ({type_label}, ISIN: {asset['isin']})\n"
+
+        return f"""
 Du bist ein präziser Finanzanalyst. Heute ist der {date.today().strftime('%d.%m.%Y')}.
 
 Suche nach aktuellen Nachrichten der letzten 24 Stunden, die Auswirkungen auf folgende Assets haben könnten:
@@ -28,20 +50,20 @@ Suche nach aktuellen Nachrichten der letzten 24 Stunden, die Auswirkungen auf fo
 Für jede relevante Nachricht:
 - Beschreibe kurz die Nachricht
 - Erkläre welche Assets davon betroffen sind
-- Bewerte die Auswirkung: 📈 positiv, 📉 negativ oder ⚠️ unklar
+- Bewerte die Auswirkung: positiv, negativ oder unklar
 
-Fokus auf: Makroökonomie, Zinsentscheide, Geopolitik, Unternehmensnews (besonders SAP), Technologiesektor.
+Fokus auf: Makroökonomie, Zinsentscheide, Geopolitik, Unternehmensnews, Technologiesektor.
 Ignoriere unwichtige oder nicht relevante Nachrichten.
 Format: Pro Nachricht ein Block mit Bullet Points. Maximal 5 Nachrichten.
-Schreibe NUR den Bericht, keine Einleitung oder Abschluss.
+Schreibe NUR den Bericht, keine Einleitung oder Abschluss. Verwende keine Emojis.
 """
 
 async def main():
     config = load_config()
     assets = config["assets"]
-    prompt = build_prompt(assets)
+    language = config.get("language", "de")
+    prompt = build_prompt(assets, language)
 
-    # Gemini aufrufen mit Google Search Grounding
     client = genai.Client(api_key=GEMINI_API_KEY)
     response = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -52,9 +74,9 @@ async def main():
     )
     report = response.text
 
-    # Telegram senden
     today = date.today().strftime('%d.%m.%Y')
-    message = f"📊 *Marktbericht {today}*\n\n{report}"
+    title = "Market Report" if language == "en" else "Marktbericht"
+    message = f"*{title} {today}*\n\n{report}"
 
     bot = Bot(token=TELEGRAM_BOT_TOKEN)
     await bot.send_message(
@@ -62,7 +84,6 @@ async def main():
         text=message,
         parse_mode="Markdown"
     )
-    print(f"✅ Bericht erfolgreich gesendet ({len(report)} Zeichen)")
 
 if __name__ == "__main__":
     asyncio.run(main())
