@@ -56,6 +56,7 @@ Fokus auf: Makroökonomie, Zinsentscheide, Geopolitik, Unternehmensnews, Technol
 Ignoriere unwichtige oder nicht relevante Nachrichten.
 Format: Pro Nachricht ein Block mit Bullet Points. Maximal 5 Nachrichten.
 Schreibe NUR den Bericht, keine Einleitung oder Abschluss. Verwende keine Emojis.
+Der Bericht darf maximal 3950 Zeichen lang sein.
 """
 
 async def main():
