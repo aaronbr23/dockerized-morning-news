@@ -85,7 +85,9 @@ crontab -e
 Add this line to run the report every morning at 06:30:
 
 ```
-30 6 * * * cd /home/pi/dockerized-morning-news && docker compose up --build >> /var/log/market-reporter.log 2>&1
+30 6 * * * cd /home/name/dockerized-morning-news && docker compose up --build >> /home/name/market-reporter.log 2>&1
+
+!change the path to your own projects path!
 ```
 
 ## Project structure
