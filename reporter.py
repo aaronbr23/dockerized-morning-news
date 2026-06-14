@@ -35,6 +35,7 @@ Focus on: macroeconomics, interest rate decisions, geopolitics, company news, te
 Ignore unimportant or irrelevant news.
 Format: One block per news item with bullet points. Maximum 5 news items.
 Write ONLY the report, no introduction or closing remarks. Do not use emojis.
+The text should not be longer than 3000 characters.
 """
     else:
         asset_list = ""
@@ -56,7 +57,7 @@ Fokus auf: Makroökonomie, Zinsentscheide, Geopolitik, Unternehmensnews, Technol
 Ignoriere unwichtige oder nicht relevante Nachrichten.
 Format: Pro Nachricht ein Block mit Bullet Points. Maximal 5 Nachrichten.
 Schreibe NUR den Bericht, keine Einleitung oder Abschluss. Verwende keine Emojis.
-Der Bericht darf maximal 3950 Zeichen lang sein.
+Der Text darf maximal 3000 Zeichen lang sein.
 """
 
 async def main():
